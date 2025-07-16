@@ -39,15 +39,17 @@ liga = st.sidebar.selectbox("Selecciona una liga", list(LEAGUES.keys()))
 mostrar_graficos = st.sidebar.checkbox("📈 Mostrar gráficos", value=True)
 mostrar_odds = st.sidebar.checkbox("💸 Mostrar cuotas y recomendaciones", value=True)
 
-# Función para obtener partidos
+# Función para obtener partidos de múltiples temporadas
 def get_matches(league_id):
-    url = f"{BASE_URL}/fixtures?league={league_id}&season=2024"
-    response = requests.get(url, headers=HEADERS)
-    if response.status_code == 200:
-        data = response.json()
-        if data['response']:
-            return pd.json_normalize(data['response'])
-    return pd.DataFrame()
+    for season in [2024, 2023, 2022]:
+        url = f"{BASE_URL}/fixtures?league={league_id}&season={season}"
+        response = requests.get(url, headers=HEADERS)
+        if response.status_code == 200:
+            data = response.json()
+            if data['response']:
+                st.success(f"✅ Datos encontrados para la temporada {season}")
+                return pd.json_normalize(data['response']), season
+    return pd.DataFrame(), None
 
 # Función para obtener cuotas
 def get_odds(fixture_id):
@@ -65,7 +67,7 @@ def get_odds(fixture_id):
 # Botón para cargar datos
 if st.button("🔄 Obtener partidos"):
     league_id = LEAGUES[liga]
-    matches = get_matches(league_id)
+    matches, season_found = get_matches(league_id)
 
     if not matches.empty:
         matches['date'] = pd.to_datetime(matches['fixture.date'])
@@ -74,7 +76,7 @@ if st.button("🔄 Obtener partidos"):
         matches['status'] = matches['fixture.status.long']
         matches['fixture_id'] = matches['fixture.id']
 
-        st.subheader("📋 Partidos")
+        st.subheader(f"📋 Partidos (Temporada {season_found})")
         st.dataframe(matches[['date', 'home', 'away', 'status']], use_container_width=True)
 
         if mostrar_odds:
@@ -105,5 +107,4 @@ if st.button("🔄 Obtener partidos"):
             ).properties(width=600, height=400, title="Número de partidos por fecha")
             st.altair_chart(chart1, use_container_width=True)
     else:
-        st.warning("⚠️ No hay partidos en esta liga para la temporada 2024.")
-
+        st.warning("⚠️ No hay datos en las últimas 3 temporadas para esta liga.")

@@ -12,20 +12,14 @@ HEADERS = {"x-apisports-key": API_KEY}
 
 # Diccionario de ligas
 LEAGUES = {
-    "🇨🇴 Colombia - Primera A": 239,
-    "🇨🇴 Colombia - Primera B": 240,
-    "🇨🇴 Colombia - Copa Colombia": 241,
-    "🇧🇷 Brasil - Serie A": 71,
-    "🇧🇷 Brasil - Serie B": 72,
-    "🇧🇷 Brasil - Serie C": 73,
-    "🇸🇦 Arabia Saudita - Pro League": 307,
-    "🇸🇦 Arabia Saudita - King’s Cup": 308,
-    "🇳🇴 Noruega - OBOS-ligaen": 3,
-    "🇯🇵 Japón - J-League 2": 98,
-    "🇨🇱 Chile - Primera B": 265,
-    "🇿🇦 Sudáfrica - PSL": 197,
-    "🇻🇳 Vietnam - V.League 2": 384,
-    "🇰🇪 Kenia - Premier League": 370
+    "🇪🇸 España - La Liga": 140,
+    "🏴 Inglaterra - Premier League": 39,
+    "🇮🇹 Italia - Serie A": 135,
+    "🇫🇷 Francia - Ligue 1": 61,
+    "🇩🇪 Alemania - Bundesliga": 78,
+    "🇺🇸 EE.UU. - MLS": 253,
+    "🇦🇷 Argentina - Liga Profesional": 128,
+    "🇲🇽 México - Liga MX": 262
 }
 
 # Configuración de página

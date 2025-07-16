@@ -45,10 +45,16 @@ def get_current_season(league_id):
     response = requests.get(url, headers=HEADERS)
     if response.status_code == 200:
         data = response.json()
-        season = data['response'][0]['seasons']
-        current = next((s['year'] for s in season if s['current']), None)
-        return current
-    return None
+        if data['response']:
+            season = data['response'][0]['seasons']
+            current = next((s['year'] for s in season if s['current']), None)
+            return current
+        else:
+            st.warning("⚠️ No se encontraron datos de la liga seleccionada.")
+            return None
+    else:
+        st.error("❌ Error al obtener datos de la liga.")
+        return None
 
 # Función para obtener partidos
 def get_matches(league_id, season):
@@ -56,10 +62,9 @@ def get_matches(league_id, season):
     response = requests.get(url, headers=HEADERS)
     if response.status_code == 200:
         data = response.json()
-        return pd.json_normalize(data['response'])
-    else:
-        st.error("❌ Error al conectar con API-FOOTBALL")
-        return pd.DataFrame()
+        if data['response']:
+            return pd.json_normalize(data['response'])
+    return pd.DataFrame()
 
 # Función para obtener cuotas
 def get_odds(fixture_id):
@@ -120,7 +125,3 @@ if st.button("🔄 Obtener partidos"):
                 st.altair_chart(chart1, use_container_width=True)
         else:
             st.warning("⚠️ No hay partidos para esta liga en la temporada actual.")
-    else:
-        st.error("❌ No se pudo obtener la temporada actual para esta liga.")
-
-

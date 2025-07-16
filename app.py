@@ -39,26 +39,9 @@ liga = st.sidebar.selectbox("Selecciona una liga", list(LEAGUES.keys()))
 mostrar_graficos = st.sidebar.checkbox("📈 Mostrar gráficos", value=True)
 mostrar_odds = st.sidebar.checkbox("💸 Mostrar cuotas y recomendaciones", value=True)
 
-# Función para obtener temporada actual
-def get_current_season(league_id):
-    url = f"{BASE_URL}/leagues?id={league_id}"
-    response = requests.get(url, headers=HEADERS)
-    if response.status_code == 200:
-        data = response.json()
-        if data['response']:
-            season = data['response'][0]['seasons']
-            current = next((s['year'] for s in season if s['current']), None)
-            return current
-        else:
-            st.warning("⚠️ No se encontraron datos de la liga seleccionada.")
-            return None
-    else:
-        st.error("❌ Error al obtener datos de la liga.")
-        return None
-
 # Función para obtener partidos
-def get_matches(league_id, season):
-    url = f"{BASE_URL}/fixtures?league={league_id}&season={season}"
+def get_matches(league_id):
+    url = f"{BASE_URL}/fixtures?league={league_id}&season=2024"
     response = requests.get(url, headers=HEADERS)
     if response.status_code == 200:
         data = response.json()
@@ -82,46 +65,45 @@ def get_odds(fixture_id):
 # Botón para cargar datos
 if st.button("🔄 Obtener partidos"):
     league_id = LEAGUES[liga]
-    season = get_current_season(league_id)
-    if season:
-        matches = get_matches(league_id, season)
+    matches = get_matches(league_id)
 
-        if not matches.empty:
-            matches['date'] = pd.to_datetime(matches['fixture.date'])
-            matches['home'] = matches['teams.home.name']
-            matches['away'] = matches['teams.away.name']
-            matches['status'] = matches['fixture.status.long']
-            matches['fixture_id'] = matches['fixture.id']
+    if not matches.empty:
+        matches['date'] = pd.to_datetime(matches['fixture.date'])
+        matches['home'] = matches['teams.home.name']
+        matches['away'] = matches['teams.away.name']
+        matches['status'] = matches['fixture.status.long']
+        matches['fixture_id'] = matches['fixture.id']
 
-            st.subheader("📋 Partidos")
-            st.dataframe(matches[['date', 'home', 'away', 'status']], use_container_width=True)
+        st.subheader("📋 Partidos")
+        st.dataframe(matches[['date', 'home', 'away', 'status']], use_container_width=True)
 
-            if mostrar_odds:
-                st.subheader("💸 Cuotas y Recomendaciones")
-                odds_data = []
-                for _, row in matches.iterrows():
-                    odds = get_odds(row['fixture_id'])
-                    if odds:
-                        probabilities = {k: round((1/float(v))*100, 2) for k, v in odds.items()}
-                        odds_data.append({
-                            "Partido": f"{row['home']} vs {row['away']}",
-                            "Fecha": row['date'],
-                            **odds,
-                            "Prob. Implícitas": probabilities
-                        })
-                if odds_data:
-                    odds_df = pd.DataFrame(odds_data)
-                    st.dataframe(odds_df, use_container_width=True)
-                else:
-                    st.warning("⚠️ No se encontraron cuotas para los partidos mostrados.")
+        if mostrar_odds:
+            st.subheader("💸 Cuotas y Recomendaciones")
+            odds_data = []
+            for _, row in matches.iterrows():
+                odds = get_odds(row['fixture_id'])
+                if odds:
+                    probabilities = {k: round((1/float(v))*100, 2) for k, v in odds.items()}
+                    odds_data.append({
+                        "Partido": f"{row['home']} vs {row['away']}",
+                        "Fecha": row['date'],
+                        **odds,
+                        "Prob. Implícitas": probabilities
+                    })
+            if odds_data:
+                odds_df = pd.DataFrame(odds_data)
+                st.dataframe(odds_df, use_container_width=True)
+            else:
+                st.warning("⚠️ No se encontraron cuotas para los partidos mostrados.")
 
-            if mostrar_graficos:
-                st.subheader("📊 Tendencias")
-                chart1 = alt.Chart(matches).mark_bar(color="#1f77b4").encode(
-                    x='date:T',
-                    y='count()',
-                    tooltip=['date:T', 'count()']
-                ).properties(width=600, height=400, title="Número de partidos por fecha")
-                st.altair_chart(chart1, use_container_width=True)
-        else:
-            st.warning("⚠️ No hay partidos para esta liga en la temporada actual.")
+        if mostrar_graficos:
+            st.subheader("📊 Tendencias")
+            chart1 = alt.Chart(matches).mark_bar(color="#1f77b4").encode(
+                x='date:T',
+                y='count()',
+                tooltip=['date:T', 'count()']
+            ).properties(width=600, height=400, title="Número de partidos por fecha")
+            st.altair_chart(chart1, use_container_width=True)
+    else:
+        st.warning("⚠️ No hay partidos en esta liga para la temporada 2024.")
+

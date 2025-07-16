@@ -6,7 +6,7 @@ import altair as alt
 # --------------------------
 # CONFIGURACIÓN API FOOTBALL
 # --------------------------
-API_KEY = "aeea410c8e1fe91b2ca5d97d1685943b"
+API_KEY = "aeae410c8e1fe91b2ca5d97d1685943b"
 BASE_URL = "https://v3.football.api-sports.io"
 HEADERS = {"x-apisports-key": API_KEY}
 
